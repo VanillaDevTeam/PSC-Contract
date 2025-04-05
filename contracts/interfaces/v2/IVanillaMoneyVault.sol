@@ -8,8 +8,8 @@ interface IVanillaMoneyVault {
         uint256 amount;
         uint256 fee;
         bytes32 quote_currency;
-        uint8 delivery_type;
-        uint8 position_type;
+        uint256 delivery_type;
+        uint256 position_type;
         uint256 quantity;
         uint256 delivery;
         uint256 strike_price;

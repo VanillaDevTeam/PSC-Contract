@@ -53,7 +53,7 @@ async function main() {
     // get EIP173Proxy for VanillaMarketMakerVault
     console.log("get EIP173Proxy for VanillaMarketMakerVaultV2...");
     const eip173ProxyMarketMakerVault = await hre.viem.getContractAt("EIP173Proxy", "0xaE5e8B8D1977360931fc8a76555d4A0835EAC449");
-    eip173ProxyMarketMakerVault.write.upgradeTo([marketMakerVaultImpl.address as `0x${string}`]);
+    await eip173ProxyMarketMakerVault.write.upgradeTo([marketMakerVaultImpl.address as `0x${string}`]);
 
     const marketMakerVaultAddress = await eip173ProxyMarketMakerVault.read.owner();
     console.log("VanillaMarketMakerVault proxy deployed to:", marketMakerVaultAddress);
@@ -98,7 +98,7 @@ async function main() {
     // get EIP173Proxy for VanillaMoneyVault
     console.log("get EIP173Proxy for VanillaMoneyVaultV2...");
     const eip173ProxyMoneyVault = await hre.viem.getContractAt("EIP173Proxy", "0xdEDD33CF842571358F717C0033BF7cC3CB6abff1");
-    eip173ProxyMoneyVault.write.upgradeTo([moneyVaultImpl.address as `0x${string}`]);
+    await eip173ProxyMoneyVault.write.upgradeTo([moneyVaultImpl.address as `0x${string}`]);
 
 
     // Save deployment info
