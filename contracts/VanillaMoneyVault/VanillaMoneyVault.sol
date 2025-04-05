@@ -53,7 +53,7 @@ contract VanillaMoneyVault is
         address platformFeeAccount,
         address profitSharingAccount,
         address[] calldata bots
-    ) public initializer {
+    ) public virtual initializer {
         __AccessControl_init();
         __ReentrancyGuard_init();
         require(_grantRole(ADMIN_ROLE, owner));

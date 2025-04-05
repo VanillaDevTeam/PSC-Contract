@@ -1,0 +1,15 @@
+{
+  "network": "opBnb",
+  "marketMakerVaultImpl": "0xa5c8a2ffa18513900db463a5f01aede074e54b58",
+  "marketMakerVaultProxy": "0xaE5e8B8D1977360931fc8a76555d4A0835EAC449",
+  "moneyVaultImpl": "0x78be1a300ecd4360eb1e030858ffb8e59ee330c6",
+  "moneyVaultProxy": "0xdEDD33CF842571358F717C0033BF7cC3CB6abff1",
+  "assetId": "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3",
+  "owner": "0x36cd0275746cdee559c73208c093fd32638e1640",
+  "platformFeeAccount": "0x36cd0275746cdee559c73208c093fd32638e1640",
+  "profitSharingAccount": "0x36cd0275746cdee559c73208c093fd32638e1640",
+  "bots": [
+    "0x3f7a730856b4f655b8dd47970098c30c16d908fb"
+  ],
+  "deploymentTime": "2025-04-05T08:09:11.652Z"
+}

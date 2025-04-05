@@ -11,7 +11,7 @@ async function main() {
     // Configuration
     // Replace these values with your actual configuration
     const config = {
-        assetId: process.env.ASSET_ID || "", // ERC20 token address
+        assetId: "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3", // ERC20 token address
         owner: process.env.OWNER_ADDRESS || deployerAddress,
         platformFeeAccount: process.env.PLATFORM_FEE_ACCOUNT || deployerAddress,
         profitSharingAccount: process.env.PROFIT_SHARING_ACCOUNT || deployerAddress,
@@ -46,42 +46,25 @@ async function main() {
     console.log("Bots:", safeConfig.bots);
 
     // Deploy VanillaMarketMakerVault implementation
-    console.log("Deploying VanillaMarketMakerVault implementation...");
+    console.log("Deploying VanillaMarketMakerVaultV2 implementation...");
     const marketMakerVaultImpl = await hre.viem.deployContract("VanillaMarketMakerVaultV2");
-    console.log("VanillaMarketMakerVault implementation deployed to:", marketMakerVaultImpl.address);
+    console.log("VanillaMarketMakerVaultV2 implementation deployed to:", marketMakerVaultImpl.address);
 
-    // Create initialize data for VanillaMarketMakerVault
-    console.log("Creating VanillaMarketMakerVault proxy...");
-    const initFunctionSelector = '0x485cc955'; // function selector for initialize(address,address)
-    const initData = initFunctionSelector + safeConfig.assetId.slice(2).padStart(64, '0') + safeConfig.owner.slice(2).padStart(64, '0');
+    // get EIP173Proxy for VanillaMarketMakerVault
+    console.log("get EIP173Proxy for VanillaMarketMakerVaultV2...");
+    const eip173ProxyMarketMakerVault = await hre.viem.getContractAt("EIP173Proxy", "0xaE5e8B8D1977360931fc8a76555d4A0835EAC449");
+    eip173ProxyMarketMakerVault.write.upgradeTo([marketMakerVaultImpl.address as `0x${string}`]);
 
-    // Deploy EIP173Proxy for VanillaMarketMakerVault using ethers
-    console.log("Deploying EIP173Proxy for VanillaMarketMakerVault...");
-
-    // Get the EIP173Proxy contract factory using ethers
-    const eip173ProxyFactory = await ethers.getContractFactory("contracts/EIP173Proxy/solc_0.8/proxy/EIP173Proxy.sol:EIP173Proxy");
-    const marketMakerVaultProxy = await eip173ProxyFactory.deploy(
-        marketMakerVaultImpl.address,
-        safeConfig.owner,
-        initData
-    );
-    await marketMakerVaultProxy.waitForDeployment();
-
-    const marketMakerVaultAddress = await marketMakerVaultProxy.getAddress() as `0x${string}`;
+    const marketMakerVaultAddress = await eip173ProxyMarketMakerVault.read.owner();
     console.log("VanillaMarketMakerVault proxy deployed to:", marketMakerVaultAddress);
 
-    // Use the proxy address for subsequent operations
-    // Convert the ethers contract to a viem contract by reattaching
-    console.log("Connecting to VanillaMarketMakerVault through proxy...");
-    const marketMakerVaultContract = await ethers.getContractAt("VanillaMarketMakerVault", marketMakerVaultAddress);
-
     // Deploy VanillaMoneyVault implementation
-    console.log("Deploying VanillaMoneyVault implementation...");
+    console.log("Deploying VanillaMoneyVaultV2 implementation...");
     const moneyVaultImpl = await hre.viem.deployContract("VanillaMoneyVaultV2");
-    console.log("VanillaMoneyVault implementation deployed to:", moneyVaultImpl.address);
+    console.log("VanillaMoneyVaultV2 implementation deployed to:", moneyVaultImpl.address);
 
     // Create initialize data for VanillaMoneyVault
-    console.log("Creating VanillaMoneyVault proxy...");
+    console.log("Creating VanillaMoneyVaultV2 proxy...");
 
     // Use viem's encodeFunctionData instead of manual encoding
     const moneyVaultInitData = encodeFunctionData({
@@ -112,32 +95,11 @@ async function main() {
         ]
     });
 
-    // Deploy EIP173Proxy for VanillaMoneyVault
-    console.log("Deploying EIP173Proxy for VanillaMoneyVault...");
-    const moneyVaultProxy = await eip173ProxyFactory.deploy(
-        moneyVaultImpl.address,
-        safeConfig.owner,
-        moneyVaultInitData
-    );
-    await moneyVaultProxy.waitForDeployment();
+    // get EIP173Proxy for VanillaMoneyVault
+    console.log("get EIP173Proxy for VanillaMoneyVaultV2...");
+    const eip173ProxyMoneyVault = await hre.viem.getContractAt("EIP173Proxy", "0xdEDD33CF842571358F717C0033BF7cC3CB6abff1");
+    eip173ProxyMoneyVault.write.upgradeTo([moneyVaultImpl.address as `0x${string}`]);
 
-    const moneyVaultAddress = await moneyVaultProxy.getAddress() as `0x${string}`;
-    console.log("VanillaMoneyVault proxy deployed to:", moneyVaultAddress);
-
-    // Use the proxy address for subsequent operations
-    console.log("Connecting to VanillaMoneyVault through proxy...");
-    const moneyVaultContract = await ethers.getContractAt("VanillaMoneyVaultV2", moneyVaultAddress);
-
-    // Grant MONEY_VAULT_ROLE to VanillaMoneyVault in VanillaMarketMakerVault
-    console.log("Granting MONEY_VAULT_ROLE to VanillaMoneyVault...");
-    // Get the MONEY_VAULT_ROLE bytes32 value using ethers
-    const MONEY_VAULT_ROLE = await marketMakerVaultContract.MONEY_VAULT_ROLE();
-    console.log("MONEY_VAULT_ROLE:", MONEY_VAULT_ROLE);
-
-    // Grant the role using ethers
-    const grantRoleTx = await marketMakerVaultContract.grantRole(MONEY_VAULT_ROLE, moneyVaultAddress);
-    await grantRoleTx.wait();
-    console.log("MONEY_VAULT_ROLE granted to:", moneyVaultAddress);
 
     // Save deployment info
     const deploymentInfo = {
@@ -145,7 +107,7 @@ async function main() {
         marketMakerVaultImpl: marketMakerVaultImpl.address,
         marketMakerVaultProxy: marketMakerVaultAddress,
         moneyVaultImpl: moneyVaultImpl.address,
-        moneyVaultProxy: moneyVaultAddress,
+        moneyVaultProxy: "0x072C7063584576E9869a322f8AAF671E3D45b3D7",
         assetId: safeConfig.assetId,
         owner: safeConfig.owner,
         platformFeeAccount: safeConfig.platformFeeAccount,

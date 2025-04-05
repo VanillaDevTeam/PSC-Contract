@@ -7,7 +7,7 @@ interface IVanillaMoneyVault {
         bytes32 orderId;
         uint256 amount;
         uint256 fee;
-        address quote_currency;
+        bytes32 quote_currency;
         uint8 delivery_type;
         uint8 position_type;
         uint256 quantity;

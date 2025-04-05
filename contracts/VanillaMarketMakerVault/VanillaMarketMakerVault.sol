@@ -55,7 +55,10 @@ contract VanillaMarketMakerVault is
         _disableInitializers();
     }
 
-    function initialize(address assetId, address owner) public initializer {
+    function initialize(
+        address assetId,
+        address owner
+    ) public virtual initializer {
         __Pausable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
