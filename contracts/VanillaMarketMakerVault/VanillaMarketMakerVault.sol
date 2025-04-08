@@ -18,6 +18,7 @@ error VanillaMarketMakerVault__MarketMakerInsufficient();
 error VanillaMarketMakerVault__CumulativeIncomeInsufficient();
 error VanillaMarketMakerVault__cumulativeSharesInsufficient();
 error VanillaMarketMakerVault__NotWhitelisted();
+error VanillaMarketMakerVault__InvalidAmount();
 
 contract VanillaMarketMakerVault is
     IVanillaMarketMakerVault,
@@ -154,19 +155,32 @@ contract VanillaMarketMakerVault is
     function partialUnstake(
         uint256 amount
     ) external nonReentrant whenNotPaused {
-        uint256 shares = calculateShares(amount);
-        uint256 balances = calculateAmounts(shares);
-        // uint256 shares = calculateShares(amount);
+        uint256 balances = userInfo[_msgSender()].amounts;
+        if (amount == 0 || amount > balances) {
+            revert VanillaMarketMakerVault__InvalidAmount();
+        }
+        uint256 shares = (amount * userInfo[_msgSender()].shares) / balances;
+        uint256 amountToTransfer = calculateAmounts(shares);
         if (slot1.cumulativeShares < shares)
             revert VanillaMarketMakerVault__cumulativeSharesInsufficient();
-        if (assetsManagement() < amount)
+        if (assetsManagement() < amountToTransfer)
             revert VanillaMarketMakerVault__InsufficientVaultBalance();
         slot1.pledgedFunds -= amount;
         slot1.cumulativeShares -= shares;
         userInfo[_msgSender()].shares -= shares;
         userInfo[_msgSender()].amounts -= amount;
-        IERC20(slot1.assetId).safeTransfer(_msgSender(), amount);
-        emit UnStake(_msgSender(), amount, shares, balances);
+
+        if (userInfo[_msgSender()].amounts == 0) {
+            userNumber -= 1;
+        }
+
+        IERC20(slot1.assetId).safeTransfer(_msgSender(), amountToTransfer);
+        emit UnStake(
+            _msgSender(),
+            amountToTransfer,
+            shares,
+            userInfo[_msgSender()].amounts
+        );
     }
 
     function enablePause(bool enableOrNot) external onlyRole(ADMIN_ROLE) {
