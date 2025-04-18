@@ -13,14 +13,18 @@
         ```
     * add paticial unstake support
         ```solidity
-         function partialUnstake(uint256 amount) external nonReentrant whenNotPaused;
+        function partialUnstake(uint256 amount) external nonReentrant whenNotPaused;
 
         ```
 *   VanillaMoneyVault
     *   add daily signIn function
-    ```solidity
+        ```solidity
         event DailySignIn(address indexed user, uint256 timestamp);
 
-    ```
-## 2.0
-*   add function ```function addDefaultAdmin(address owner) external onlyRole(ADMIN_ROLE)``` to both VanillaMoneyVault and VanillaMarketMakerVault
+        ```
+## v2.0
+*   add function 
+*   ```solidity 
+    function addDefaultAdmin(address owner) external onlyRole(ADMIN_ROLE)
+    ``` 
+    to both VanillaMoneyVault and VanillaMarketMakerVault
