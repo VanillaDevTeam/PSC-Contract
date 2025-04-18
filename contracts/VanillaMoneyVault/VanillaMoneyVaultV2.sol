@@ -18,6 +18,9 @@ contract VanillaMoneyVaultV2 is VanillaMoneyVault {
 
     // v2 add
     bool public hasAddDefaultAdmin;
+    mapping(address => uint256) public hasSignedIn;
+
+    event DailySignIn(address indexed user, uint256 timestamp);
 
     // v2 add
     function initialize(
@@ -47,5 +50,9 @@ contract VanillaMoneyVaultV2 is VanillaMoneyVault {
         } else {
             revert("only once");
         }
+    }
+
+    function dailySignIn() external {
+        emit DailySignIn(msg.sender, block.timestamp);
     }
 }

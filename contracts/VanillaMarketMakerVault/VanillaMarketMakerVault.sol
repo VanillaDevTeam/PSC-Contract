@@ -50,7 +50,11 @@ contract VanillaMarketMakerVault is
     mapping(address => UserInfo) public userInfo;
     uint256 public userNumber;
 
+    // v2.1 add
     EnumerableSet.AddressSet private stakeWhiteList;
+
+    event WhitelistStake(address indexed account);
+    event RemoveWhitelistStake(address indexed account);
 
     constructor() {
         _disableInitializers();
@@ -75,16 +79,6 @@ contract VanillaMarketMakerVault is
 
     function assetsManagement() public view returns (uint256) {
         return IERC20(slot1.assetId).balanceOf(address(this));
-    }
-
-    function whitelistStake(address account) external onlyRole(ADMIN_ROLE) {
-        stakeWhiteList.add(account);
-    }
-
-    function removeWhitelistStake(
-        address account
-    ) external onlyRole(ADMIN_ROLE) {
-        stakeWhiteList.remove(account);
     }
 
     function calculateShares(uint256 amounts) public view returns (uint256) {
@@ -152,6 +146,34 @@ contract VanillaMarketMakerVault is
         emit UnStake(_msgSender(), amount, shares, balances);
     }
 
+    function enablePause(bool enableOrNot) external onlyRole(ADMIN_ROLE) {
+        if (enableOrNot) {
+            _pause();
+        } else {
+            _unpause();
+        }
+    }
+
+    // v2.1 add
+    function whitelistStake(address account) external onlyRole(ADMIN_ROLE) {
+        if (stakeWhiteList.add(account)) {
+            emit WhitelistStake(account);
+        }
+    }
+
+    function removeWhitelistStake(
+        address account
+    ) external onlyRole(ADMIN_ROLE) {
+        if (stakeWhiteList.remove(account)) {
+            emit RemoveWhitelistStake(account);
+        }
+    }
+
+    function isWhitelisted(address account) external view returns (bool) {
+        return stakeWhiteList.contains(account);
+    }
+
+    // v2.1 add
     function partialUnstake(
         uint256 amount
     ) external nonReentrant whenNotPaused {
@@ -181,13 +203,5 @@ contract VanillaMarketMakerVault is
             shares,
             userInfo[_msgSender()].amounts
         );
-    }
-
-    function enablePause(bool enableOrNot) external onlyRole(ADMIN_ROLE) {
-        if (enableOrNot) {
-            _pause();
-        } else {
-            _unpause();
-        }
     }
 }
