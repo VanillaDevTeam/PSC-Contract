@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import fs from "fs";
 import path from "path";
-
+import { encodeFunctionData } from "viem";
 async function main() {
     const networkName = hre.network.name;
     console.log(`Verifying contracts on ${networkName}...`);
@@ -28,8 +28,8 @@ async function main() {
         .sort((a, b) => {
             const timeA = a.split("-").slice(1).join("-").replace(".json", "");
             const timeB = b.split("-").slice(1).join("-").replace(".json", "");
-            return new Date(timeB).getTime() - new Date(timeA).getTime();
-        })[0];
+            return new Date(timeA).getTime() - new Date(timeB).getTime();
+        })[deploymentFiles.length - 1];
 
     const deploymentPath = path.join(deploymentsDir, mostRecentFile);
     console.log(`Using deployment file: ${deploymentPath}`);
@@ -42,8 +42,15 @@ async function main() {
         moneyVaultImpl,
         moneyVaultProxy,
         assetId,
-        owner
+        owner,
+        platformFeeAccount,
+        profitSharingAccount,
+        bots
     } = deploymentData;
+
+    console.log("Creating VanillaMarketMakerVault proxy...");
+    const initFunctionSelector = '0x485cc955'; // function selector for initialize(address,address)
+    const initData = initFunctionSelector + assetId.slice(2).padStart(64, '0') + owner.slice(2).padStart(64, '0');
 
     // Verify implementation contracts
     console.log("\nVerifying implementation contracts:");
@@ -76,6 +83,63 @@ async function main() {
         console.error("❌ Error verifying VanillaMoneyVault implementation:", error);
         console.log(`Explorer URL: https://opbnb.bscscan.com/address/${moneyVaultImpl}#code`);
     }
+
+    // Verify EIP173Proxy implementation
+    console.log(`\nVerifying EIP173Proxy implementation at ${marketMakerVaultProxy}...`);
+    try {
+        await hre.run("verify:verify", {
+            address: marketMakerVaultProxy,
+            constructorArguments: ["0xfdeec30b1829b28417c274ff86e9cf28e8451c63", owner, initData],
+        });
+        console.log("✅ EIP173Proxy implementation verified successfully");
+    } catch (error) {
+        console.error("❌ Error verifying EIP173Proxy implementation:", error);
+        console.log(`Explorer URL: https://opbnb.bscscan.com/address/${marketMakerVaultProxy}#code`);
+    }
+
+    const moneyVaultInitData = encodeFunctionData({
+        abi: [
+            {
+                type: 'function',
+                name: 'initialize',
+                inputs: [
+                    { type: 'address', name: 'assetId' },
+                    { type: 'address', name: 'owner' },
+                    { type: 'address', name: 'marketMakerVault' },
+                    { type: 'address', name: 'platformFeeAccount' },
+                    { type: 'address', name: 'profitSharingAccount' },
+                    { type: 'address[]', name: 'bots' }
+                ],
+                outputs: [],
+                stateMutability: 'nonpayable'
+            }
+        ],
+        functionName: 'initialize',
+        args: [
+            assetId,
+            owner,
+            marketMakerVaultProxy,
+            platformFeeAccount,
+            profitSharingAccount,
+            bots
+        ]
+    });
+
+    // Verify EIP173Proxy implementation
+    console.log(`\nVerifying EIP173Proxy implementation at ${moneyVaultProxy}...`);
+    try {
+        await hre.run("verify:verify", {
+            address: moneyVaultProxy,
+            constructorArguments: ["0x65f5c034374c9f0b8dcb7b073b04940b95ee60f9", owner, moneyVaultInitData],
+        });
+        console.log("✅ EIP173Proxy implementation verified successfully");
+    } catch (error) {
+        console.error("❌ Error verifying EIP173Proxy implementation:", error);
+        console.log(`Explorer URL: https://opbnb.bscscan.com/address/${moneyVaultProxy}#code`);
+    }
+
+
+
 
     console.log("\nVerification process for implementation contracts completed");
     console.log("\nNOTE: You may need to verify the proxy contracts manually through the explorer if auto-verification fails");

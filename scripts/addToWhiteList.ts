@@ -15,6 +15,6 @@ async function addToWhiteList(address: string, addressToAdd: string) {
     console.log(`Address ${addressToAdd} added to whitelist in contract ${address}`);
 }
 
-addToWhiteList("0xf5079707731cb55BdE02dce8AF07a5f1FE2405b0", "0x89eB8D017454055649963c514bD4673AB4A74F66");
+addToWhiteList("0xaAd5005D2EF036d0a8b0Ab5322c852e55d9236cF", "0x64b50ee3cb2fa844c3a9d0a6c24f0bcdd29484fb");
 
 

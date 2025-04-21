@@ -139,6 +139,9 @@ async function main() {
     await grantRoleTx.wait();
     console.log("MONEY_VAULT_ROLE granted to:", moneyVaultAddress);
 
+    // Grant the role using ethers
+
+
     // Save deployment info
     const deploymentInfo = {
         network: hre.network.name,

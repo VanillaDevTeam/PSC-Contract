@@ -14,7 +14,9 @@ const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "";
 const OPBNB_RPC_URL = process.env.OPBNB_RPC_URL || "";
+const BSC_RPC_URL = process.env.BSC_RPC_URL || "";
 const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY || "";
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.28",
@@ -58,6 +60,10 @@ const config: HardhatUserConfig = {
       url: OPBNB_RPC_URL,
       accounts: [PRIVATE_KEY || ""],
     },
+    bsc: {
+      url: BSC_RPC_URL,
+      accounts: [PRIVATE_KEY || ""],
+    },
   },
   paths: {
     sources: "./contracts",
@@ -72,6 +78,7 @@ const config: HardhatUserConfig = {
       sepolia: ETHERSCAN_API_KEY,
       polygonMumbai: POLYGONSCAN_API_KEY,
       opBnb: process.env.BSCSCAN_API_KEY || "",
+      bsc: process.env.BSCSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -80,6 +87,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-opbnb.bscscan.com/api",
           browserURL: "https://opbnb.bscscan.com/"
+        }
+      },
+      {
+        network: "bsc",
+        chainId: 56,
+        urls: {
+          apiURL: "https://api.bscscan.com/api",
+          browserURL: "https://bscscan.com/"
         }
       }
     ]
