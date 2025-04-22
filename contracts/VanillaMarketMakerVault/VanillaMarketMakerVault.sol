@@ -191,11 +191,6 @@ contract VanillaMarketMakerVault is
         }
 
         IERC20(slot1.assetId).safeTransfer(_msgSender(), amountToTransfer);
-        emit UnStake(
-            _msgSender(),
-            amountToTransfer,
-            shares,
-            userInfo[_msgSender()].amounts
-        );
+        emit UnStake(_msgSender(), amountToTransfer, shares, amount);
     }
 }
