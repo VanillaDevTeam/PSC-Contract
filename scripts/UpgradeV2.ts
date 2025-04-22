@@ -11,8 +11,10 @@ async function main() {
     // Configuration
     // Replace these values with your actual configuration
     const config = {
-        assetId: "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3", // ERC20 token address
+        assetId: "0x55d398326f99059fF775485246999027B3197955", // ERC20 token address
         owner: process.env.OWNER_ADDRESS || deployerAddress,
+        eip173ProxyMoneyVaultAddress: "0x994B9a6c85E89c42Ea7cC14D42afdf2eA68b72F1",
+        eip173ProxyMarketMakerVaultAddress: "0xaAd5005D2EF036d0a8b0Ab5322c852e55d9236cF",
         platformFeeAccount: process.env.PLATFORM_FEE_ACCOUNT || deployerAddress,
         profitSharingAccount: process.env.PROFIT_SHARING_ACCOUNT || deployerAddress,
         bots: (process.env.BOT_ADDRESSES || "").split(",").filter(address => address.trim() !== ""),
@@ -52,10 +54,10 @@ async function main() {
 
     // get EIP173Proxy for VanillaMarketMakerVault
     console.log("get EIP173Proxy for VanillaMarketMakerVaultV2...");
-    const eip173ProxyMarketMakerVault = await hre.viem.getContractAt("EIP173Proxy", "0xaE5e8B8D1977360931fc8a76555d4A0835EAC449");
+    const eip173ProxyMarketMakerVault = await hre.viem.getContractAt("EIP173Proxy", config.eip173ProxyMarketMakerVaultAddress as `0x${string}`);
     await eip173ProxyMarketMakerVault.write.upgradeTo([marketMakerVaultImpl.address as `0x${string}`]);
 
-    const marketMakerVaultAddress = "0xaE5e8B8D1977360931fc8a76555d4A0835EAC449";
+    const marketMakerVaultAddress = eip173ProxyMarketMakerVault.address;
 
     // Deploy VanillaMoneyVault implementation
     console.log("Deploying VanillaMoneyVaultV2 implementation...");
@@ -96,7 +98,7 @@ async function main() {
 
     // get EIP173Proxy for VanillaMoneyVault
     console.log("get EIP173Proxy for VanillaMoneyVaultV2...");
-    const eip173ProxyMoneyVault = await hre.viem.getContractAt("EIP173Proxy", "0xdEDD33CF842571358F717C0033BF7cC3CB6abff1");
+    const eip173ProxyMoneyVault = await hre.viem.getContractAt("EIP173Proxy", config.eip173ProxyMoneyVaultAddress as `0x${string}`);
     await eip173ProxyMoneyVault.write.upgradeTo([moneyVaultImpl.address as `0x${string}`]);
 
 
@@ -106,7 +108,7 @@ async function main() {
         marketMakerVaultImpl: marketMakerVaultImpl.address,
         marketMakerVaultProxy: marketMakerVaultAddress,
         moneyVaultImpl: moneyVaultImpl.address,
-        moneyVaultProxy: "0xdEDD33CF842571358F717C0033BF7cC3CB6abff1",
+        moneyVaultProxy: eip173ProxyMoneyVault.address,
         assetId: safeConfig.assetId,
         owner: safeConfig.owner,
         platformFeeAccount: safeConfig.platformFeeAccount,

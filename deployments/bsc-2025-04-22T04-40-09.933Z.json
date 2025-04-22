@@ -1,0 +1,15 @@
+{
+  "network": "bsc",
+  "marketMakerVaultImpl": "0x04594267fbcfd8a4d31022f9c178d2757d5f1329",
+  "marketMakerVaultProxy": "0xaAd5005D2EF036d0a8b0Ab5322c852e55d9236cF",
+  "moneyVaultImpl": "0x63e3f287b281c8747941cec45931cc34f0fbbadd",
+  "moneyVaultProxy": "0x994B9a6c85E89c42Ea7cC14D42afdf2eA68b72F1",
+  "assetId": "0x55d398326f99059fF775485246999027B3197955",
+  "owner": "0x36cd0275746cdee559c73208c093fd32638e1640",
+  "platformFeeAccount": "0x735a318487b758f6ddeb588e47bf07835716b334",
+  "profitSharingAccount": "0x763fce0eb4168d2cc996ae29d420a0ec9ec78527",
+  "bots": [
+    "0x5e819a0bf6a29bf3ce9440767af0b5c6e174e39e"
+  ],
+  "deploymentTime": "2025-04-22T04:40:09.933Z"
+}
