@@ -8,14 +8,8 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {IVanillaMarketMakerVault} from "../interfaces/v2/IVanillaMarketMakerVault.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-error VanillaMarketMakerVault__MismatchBalance(
-    uint256 deposited,
-    uint256 required
-);
 error VanillaMarketMakerVault__InsufficientVaultBalance();
 error VanillaMarketMakerVault__PledgeFundInsufficient();
-error VanillaMarketMakerVault__MarketMakerInsufficient();
-error VanillaMarketMakerVault__CumulativeIncomeInsufficient();
 error VanillaMarketMakerVault__cumulativeSharesInsufficient();
 error VanillaMarketMakerVault__NotWhitelisted();
 error VanillaMarketMakerVault__InvalidAmount();

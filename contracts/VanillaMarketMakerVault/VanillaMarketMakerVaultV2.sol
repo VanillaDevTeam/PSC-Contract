@@ -7,15 +7,6 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IVanillaMarketMakerVault} from "../interfaces/v2/IVanillaMarketMakerVault.sol";
 import {VanillaMarketMakerVault} from "./VanillaMarketMakerVault.sol";
-error VanillaMarketMakerVault__MismatchBalance(
-    uint256 deposited,
-    uint256 required
-);
-error VanillaMarketMakerVault__InsufficientVaultBalance();
-error VanillaMarketMakerVault__PledgeFundInsufficient();
-error VanillaMarketMakerVault__MarketMakerInsufficient();
-error VanillaMarketMakerVault__CumulativeIncomeInsufficient();
-error VanillaMarketMakerVault__cumulativeSharesInsufficient();
 
 contract VanillaMarketMakerVaultV2 is VanillaMarketMakerVault {
     using SafeERC20 for IERC20;

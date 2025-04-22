@@ -1,3 +1,12 @@
+## v2.1.1
+*   Both
+    *   Remove unused events
+*   VanillaMoneyVault
+    *   make function ``` settleOrder ``` and ``` createOrder ``` nonReentrant
+    *   validate orderid when ``` settleOrder ```
+    *   valadate platformFeeAccount when ``` createOrder ```
+
+
 ## v2.1
 *   VanillaMarketMakerVault
     *   add whiteListManagement related function  

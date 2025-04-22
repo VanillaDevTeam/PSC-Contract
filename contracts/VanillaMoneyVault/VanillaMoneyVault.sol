@@ -7,10 +7,11 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {IVanillaMoneyVault} from "../interfaces/v2/IVanillaMoneyVault.sol";
 import {IVanillaMarketMakerVault} from "../interfaces/v2/IVanillaMarketMakerVault.sol";
 
-error VanillaMoneyVault__InsufficientBalance();
 error VanillaMoneyVault__PledgeFundInsufficient();
 error VanillaMoneyVault__AlreadyExistOrder(bytes32 orderId);
 error VanillaMoneyVault__AlreadySettleOrder(bytes32 orderId);
+error VanillaMoneyVault__OrderNotExist(bytes32 orderId);
+error VanillaMoneyVault__FeeAccountIsZeroAddress();
 
 contract VanillaMoneyVault is
     IVanillaMoneyVault,
@@ -105,27 +106,30 @@ contract VanillaMoneyVault is
 
     function createOrder(
         CreateOrderParams calldata params
-    ) external override onlyRole(BOT_ROLE) {
+    ) external override onlyRole(BOT_ROLE) nonReentrant {
+        if (slot0.platformFeeAccount == address(0))
+            revert VanillaMoneyVault__FeeAccountIsZeroAddress();
         if (balances[params.account] < params.amount)
             revert VanillaMoneyVault__PledgeFundInsufficient();
         if (orderInfo[params.orderId].isExistence)
             revert VanillaMoneyVault__AlreadyExistOrder(params.orderId);
+
         orderInfo[params.orderId] = OrderInfo({
             owner: params.account,
             isSettlement: false,
             isExistence: true,
             amount: params.amount
         });
+
         balances[params.account] -= params.amount;
-        if (slot0.platformFeeAccount != address(0)) {
-            if (params.fee > 0) {
-                balances[params.account] -= params.fee;
-                IERC20(slot0.assetId).safeTransfer(
-                    slot0.platformFeeAccount,
-                    params.fee
-                );
-                emit PlatformCollectFee(slot0.platformFeeAccount, params.fee);
-            }
+
+        if (params.fee > 0) {
+            balances[params.account] -= params.fee;
+            IERC20(slot0.assetId).safeTransfer(
+                slot0.platformFeeAccount,
+                params.fee
+            );
+            emit PlatformCollectFee(slot0.platformFeeAccount, params.fee);
         }
 
         emit CreateOrder(params.account, params.orderId, params);
@@ -135,7 +139,9 @@ contract VanillaMoneyVault is
         bytes32 orderId,
         uint256 revenue,
         uint256 fee
-    ) public override onlyRole(BOT_ROLE) {
+    ) public override onlyRole(BOT_ROLE) nonReentrant {
+        if (orderInfo[orderId].isExistence == false)
+            revert VanillaMoneyVault__OrderNotExist(orderId);
         if (orderInfo[orderId].isSettlement)
             revert VanillaMoneyVault__AlreadySettleOrder(orderId);
         orderInfo[orderId].isSettlement = true;
@@ -150,6 +156,7 @@ contract VanillaMoneyVault is
             account,
             revenue + fee
         );
+
         balances[account] += revenue;
         if (fee > 0) {
             IERC20(slot0.assetId).safeTransfer(slot0.profitSharingAccount, fee);

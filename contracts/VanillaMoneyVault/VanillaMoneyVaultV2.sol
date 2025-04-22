@@ -8,11 +8,6 @@ import {IVanillaMoneyVault} from "../interfaces/v2/IVanillaMoneyVault.sol";
 import {IVanillaMarketMakerVault} from "../interfaces/v2/IVanillaMarketMakerVault.sol";
 import {VanillaMoneyVault} from "./VanillaMoneyVault.sol";
 
-error VanillaMoneyVault__InsufficientBalance();
-error VanillaMoneyVault__PledgeFundInsufficient();
-error VanillaMoneyVault__AlreadyExistOrder(bytes32 orderId);
-error VanillaMoneyVault__AlreadySettleOrder(bytes32 orderId);
-
 contract VanillaMoneyVaultV2 is VanillaMoneyVault {
     using SafeERC20 for IERC20;
 
